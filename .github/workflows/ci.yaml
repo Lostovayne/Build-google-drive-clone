@@ -1,23 +1,53 @@
 name: CI
 
-on: [push]
+on:
+  push:
+    branches:
+      - main # Especifica ramas si no quieres que se ejecute en todas
+  pull_request:
+    branches:
+      - main # Ejecuta también en pull requests hacia main
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      # Checkout del código
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Usa una versión más reciente (v4 es la última a marzo 2025)
 
-      - name: Install Dependencies
-        run: npm install -g bun && bun install
+      # Configura caché para acelerar la instalación de dependencias
+      - name: Cache Bun dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
+      # Instala Bun y las dependencias
+      - name: Install Bun and Dependencies
+        run: |
+          npm install -g bun
+          bun install --frozen-lockfile  # Evita cambios inesperados en el lockfile
+
+      # Copia archivos .env.example a .env
       - name: Copy .env.example files
         shell: bash
-        run: find . -type f -name ".env.example" -exec sh -c 'cp "$1" "${1%.*}"' _ {} \;
+        run: |
+          find . -type f -name ".env.example" -exec sh -c 'cp "$1" "${1%.*}"' _ {} \;
+        # Agrega manejo de errores
+        continue-on-error: true # Opcional: permite que el pipeline continúe si falla este paso
 
-      - name: Typecheck
+      # Verificación de tipos
+      - name: Run Typecheck
         run: bun typecheck
 
-      - name: Lint
+      # Lint del código
+      - name: Run Lint
         run: bun lint
+
+      # Opcional: Agrega un paso para pruebas si existen
+      # - name: Run Tests
+      # run: bun test
+      # if: always()  # Ejecuta incluso si pasos previos fallan (opcional)
