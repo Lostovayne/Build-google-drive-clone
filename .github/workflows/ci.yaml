@@ -47,6 +47,17 @@ jobs:
       - name: Run Lint
         run: bun lint
 
+      # Ejecuta el script de preparación de la base de datos
+      # - name: Run Database Preparation Script
+      #   run: bun run src/server/db/prepare.ts
+      #   continue-on-error: true
+      #   env:
+      #     SINGLESTORE_HOST: ${{ vars.SINGLESTORE_HOST }}
+      #     SINGLESTORE_PORT: ${{ vars.SINGLESTORE_PORT }}
+      #     SINGLESTORE_USER: ${{ vars.SINGLESTORE_USER }}
+      #     SINGLESTORE_PASS: ${{ vars.SINGLESTORE_PASS }}
+      #     SINGLESTORE_DB_NAME: ${{ vars.SINGLESTORE_DB_NAME }}
+
       # Opcional: Agrega un paso para pruebas si existen
       # - name: Run Tests
       # run: bun test
